@@ -41,7 +41,7 @@ TEST_CONNECTION_ERROR_DICT = {
 }
 
 
-class ForkedDaapdOptionsFlowHandler(config_entries.OptionsFlow):
+class OwntoneOptionsFlowHandler(config_entries.OptionsFlow):
     """Handle a owntone options flow."""
 
     def __init__(self, config_entry):
@@ -97,7 +97,7 @@ def fill_in_schema_dict(some_input):
     return schema_dict
 
 
-class ForkedDaapdFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
+class OwntoneFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a owntone config flow."""
 
     VERSION = 1
@@ -110,7 +110,7 @@ class ForkedDaapdFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     @callback
     def async_get_options_flow(config_entry):
         """Return options flow handler."""
-        return ForkedDaapdOptionsFlowHandler(config_entry)
+        return OwntoneOptionsFlowHandler(config_entry)
 
     async def validate_input(self, user_input):
         """Validate the user input."""
