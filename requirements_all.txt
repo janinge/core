@@ -1468,7 +1468,7 @@ pyflunearyou==2.0.2
 # homeassistant.components.futurenow
 pyfnip==0.2
 
-# homeassistant.components.forked_daapd
+# homeassistant.components.owntone
 pyforked-daapd==0.1.11
 
 # homeassistant.components.freedompro
@@ -1574,7 +1574,7 @@ pylaunches==1.0.0
 # homeassistant.components.lg_netcast
 pylgnetcast==0.3.3
 
-# homeassistant.components.forked_daapd
+# homeassistant.components.owntone
 pylibrespot-java==0.1.0
 
 # homeassistant.components.litejet

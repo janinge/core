@@ -84,7 +84,7 @@ FLOWS = [
     "flume",
     "flunearyou",
     "forecast_solar",
-    "forked_daapd",
+    "owntone",
     "foscam",
     "freebox",
     "freedompro",

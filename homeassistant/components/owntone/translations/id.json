@@ -1,0 +1,42 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "Perangkat sudah dikonfigurasi",
+            "not_owntone": "Perangkat bukan server owntone."
+        },
+        "error": {
+            "forbidden": "Tidak dapat terhubung. Periksa izin jaringan owntone Anda.",
+            "unknown_error": "Kesalahan yang tidak diharapkan",
+            "websocket_not_enabled": "Websocket server owntone tidak diaktifkan.",
+            "wrong_host_or_port": "Tidak dapat terhubung. Periksa nilai host dan port.",
+            "wrong_password": "Kata sandi salah.",
+            "wrong_server_type": "Integrasi owntone membutuhkan server owntone dengan versi >= 27.0."
+        },
+        "flow_title": "owntone server: {name} ({host})",
+        "step": {
+            "user": {
+                "data": {
+                    "host": "Host",
+                    "name": "Nama alias",
+                    "password": "Kata sandi API (kosongkan jika tidak ada kata sandi)",
+                    "port": "Port API"
+                },
+                "title": "Siapkan perangkat owntone"
+            }
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "data": {
+                    "librespot_java_port": "Port untuk kontrol pipa librespot-java (jika digunakan)",
+                    "max_playlists": "Jumlah maksimum daftar putar yang digunakan sebagai sumber",
+                    "tts_pause_time": "Tenggang waktu dalam detik sebelum dan setelah TTS",
+                    "tts_volume": "Volume TTS (bilangan float dalam rentang [0,1])"
+                },
+                "description": "Tentukan berbagai opsi untuk integrasi owntone.",
+                "title": "Konfigurasikan opsi owntone"
+            }
+        }
+    }
+}

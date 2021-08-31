@@ -47,7 +47,7 @@ ZEROCONF = {
     ],
     "_daap._tcp.local.": [
         {
-            "domain": "forked_daapd"
+            "domain": "owntone"
         }
     ],
     "_dkapi._tcp.local.": [
