@@ -1,5 +1,6 @@
 """Const for owntone."""
 from homeassistant.components.media_player.const import (
+    SUPPORT_BROWSE_MEDIA,
     SUPPORT_CLEAR_PLAYLIST,
     SUPPORT_NEXT_TRACK,
     SUPPORT_PAUSE,
@@ -31,6 +32,15 @@ FD_NAME = "owntone"
 HASS_DATA_REMOVE_LISTENERS_KEY = "REMOVE_LISTENERS"
 HASS_DATA_UPDATER_KEY = "UPDATER"
 KNOWN_PIPES = {"librespot-java"}
+LIBRARY_MAP = {
+    "playlists": "Playlists",
+    "artists": "Artists",
+    "albums": "Albums",
+    "tracks": "Tracks",
+    "genres": "Genres",
+    "podcasts": "Podcasts",
+    "radio": "Radio",
+}
 PIPE_FUNCTION_MAP = {
     "librespot-java": {
         "async_media_play": "player_resume",
@@ -78,6 +88,7 @@ SUPPORTED_FEATURES = (
     | SUPPORT_TURN_ON
     | SUPPORT_TURN_OFF
     | SUPPORT_PLAY_MEDIA
+    | SUPPORT_BROWSE_MEDIA
 )
 SUPPORTED_FEATURES_ZONE = (
     SUPPORT_VOLUME_SET | SUPPORT_VOLUME_MUTE | SUPPORT_TURN_ON | SUPPORT_TURN_OFF

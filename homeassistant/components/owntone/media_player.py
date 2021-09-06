@@ -6,8 +6,12 @@ import logging
 from pyforked_daapd import ForkedDaapdAPI
 from pylibrespot_java import LibrespotJavaAPI
 
-from homeassistant.components.media_player import MediaPlayerEntity
-from homeassistant.components.media_player.const import MEDIA_TYPE_MUSIC
+from homeassistant.components.media_player import BrowseMedia, MediaPlayerEntity
+from homeassistant.components.media_player.errors import BrowseError
+from homeassistant.components.media_player.const import (
+    MEDIA_CLASS_DIRECTORY,
+    MEDIA_TYPE_MUSIC,
+)
 from homeassistant.const import (
     CONF_HOST,
     CONF_PASSWORD,
@@ -40,6 +44,7 @@ from .const import (
     HASS_DATA_REMOVE_LISTENERS_KEY,
     HASS_DATA_UPDATER_KEY,
     KNOWN_PIPES,
+    LIBRARY_MAP,
     PIPE_FUNCTION_MAP,
     SIGNAL_ADD_ZONES,
     SIGNAL_CONFIG_OPTIONS_UPDATE,
@@ -225,7 +230,7 @@ class OwntoneMaster(MediaPlayerEntity):
     """Representation of the main owntone device."""
 
     def __init__(
-        self, clientsession, api, ip_address, api_port, api_password, config_entry
+            self, clientsession, api, ip_address, api_port, api_password, config_entry
     ):
         """Initialize the Owntone Master Device."""
         self._api = api
@@ -343,17 +348,17 @@ class OwntoneMaster(MediaPlayerEntity):
     def _update_queue(self, queue, event):
         self._queue = queue
         if (
-            self._tts_requested
-            and self._queue["count"] == 1
-            and self._queue["items"][0]["uri"].find("tts_proxy") != -1
+                self._tts_requested
+                and self._queue["count"] == 1
+                and self._queue["items"][0]["uri"].find("tts_proxy") != -1
         ):
             self._tts_requested = False
             self._tts_queued = True
 
         if (
-            self._queue["count"] >= 1
-            and self._queue["items"][0]["data_kind"] == "pipe"
-            and self._queue["items"][0]["title"] in KNOWN_PIPES
+                self._queue["count"] >= 1
+                and self._queue["items"][0]["data_kind"] == "pipe"
+                and self._queue["items"][0]["title"] in KNOWN_PIPES
         ):  # if we're playing a pipe, set the source automatically so we can forward controls
             self._source = f"{self._queue['items'][0]['title']} (pipe)"
         self._update_track_info()
@@ -740,6 +745,43 @@ class OwntoneMaster(MediaPlayerEntity):
             await self._api.clear_queue()
         self.async_write_ha_state()
 
+    async def async_browse_media(self, media_content_type=None, media_content_id=None):
+        """Implement the websocket media browsing helper."""
+
+        if media_content_id in (None, "", "library"):
+            return await self.async_browse_media_root()
+
+        raise BrowseError(f"Media not found: {media_content_type} / {media_content_id}")
+
+    async def async_browse_media_root(self):
+        """Return root media objects."""
+
+        library_info = {
+            "title": "Media Library",
+            "media_class": MEDIA_CLASS_DIRECTORY,
+            "media_content_id": "",
+            "media_content_type": "",
+            "can_play": False,
+            "can_expand": True,
+            "children_media_class": MEDIA_CLASS_DIRECTORY
+        }
+
+        library_info.children = [
+            BrowseMedia(
+                title=name,
+                media_class=MEDIA_CLASS_DIRECTORY,
+                media_content_id=root_path,
+                media_content_type=MEDIA_CLASS_DIRECTORY,
+                can_play=True,
+                can_expand=False,
+                children=None
+            )
+            for root_path, name in LIBRARY_MAP.items()
+        ]
+
+        return BrowseMedia(**library_info)
+        response.children_media_class = MEDIA_CLASS_DIRECTORY
+
     def _use_pipe_control(self):
         """Return which pipe control from KNOWN_PIPES to use."""
         if self._source[-7:] == " (pipe)":
@@ -797,7 +839,7 @@ class OwntoneUpdater:
         update_events = {}
         _LOGGER.debug("Updating %s", update_types)
         if (
-            "queue" in update_types
+                "queue" in update_types
         ):  # update queue, queue before player for async_play_media
             queue = await self._api.get_request("queue")
             if queue:
@@ -838,7 +880,7 @@ class OwntoneUpdater:
         if not {"update", "config"}.isdisjoint(update_types):  # not supported
             _LOGGER.debug("update/config notifications neither requested nor supported")
         if not {"player", "options", "volume"}.isdisjoint(
-            update_types
+                update_types
         ):  # update player
             player = await self._api.get_request("player")
             if player:
@@ -874,3 +916,38 @@ class OwntoneUpdater:
                 self._api,
                 outputs_to_add,
             )
+
+
+def build_item_response(api, payload):  # noqa: C901
+    """Create response payload for the provided media query."""
+    media_content_type = payload["media_content_type"]
+    media_content_id = payload["media_content_id"]
+    title = None
+    image = None
+
+
+def library_payload():
+    """
+    Create response payload to describe contents of a specific library.
+
+    Used by async_browse_media.
+    """
+    library_info = {
+        "title": "Media Library",
+        "media_class": MEDIA_CLASS_DIRECTORY,
+        "media_content_id": "library",
+        "media_content_type": "library",
+        "can_play": False,
+        "can_expand": True,
+        "children": [],
+    }
+
+    for item in [{"name": n, "type": t} for t, n in LIBRARY_MAP.items()]:
+        library_info["children"].append(
+            item_payload(
+                {"name": item["name"], "type": item["type"], "uri": item["type"]}
+            )
+        )
+    response = BrowseMedia(**library_info)
+    response.children_media_class = MEDIA_CLASS_DIRECTORY
+    return response
