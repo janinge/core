@@ -10,7 +10,9 @@ from homeassistant.components.media_player import BrowseMedia, MediaPlayerEntity
 from homeassistant.components.media_player.errors import BrowseError
 from homeassistant.components.media_player.const import (
     MEDIA_CLASS_DIRECTORY,
+    MEDIA_CLASS_PODCAST,
     MEDIA_TYPE_MUSIC,
+    MEDIA_TYPE_PODCAST,
 )
 from homeassistant.const import (
     CONF_HOST,
@@ -751,36 +753,55 @@ class OwntoneMaster(MediaPlayerEntity):
         if media_content_id in (None, "", "library"):
             return await self.async_browse_media_root()
 
+        path = media_content_id.partition(":")
+
+        if path[0] == "podcasts":
+            return await self.async_browse_media_podcasts()
+
         raise BrowseError(f"Media not found: {media_content_type} / {media_content_id}")
 
     async def async_browse_media_root(self):
         """Return root media objects."""
 
-        library_info = {
-            "title": "Media Library",
-            "media_class": MEDIA_CLASS_DIRECTORY,
-            "media_content_id": "",
-            "media_content_type": "",
-            "can_play": False,
-            "can_expand": True,
-            "children_media_class": MEDIA_CLASS_DIRECTORY
-        }
+        library_info = dict(title="Media Library", media_class=MEDIA_CLASS_DIRECTORY, media_content_id="",
+                            media_content_type="", can_play=False, can_expand=True)
 
-        library_info.children = [
+        library_info['children'] = [
             BrowseMedia(
-                title=name,
-                media_class=MEDIA_CLASS_DIRECTORY,
                 media_content_id=root_path,
-                media_content_type=MEDIA_CLASS_DIRECTORY,
-                can_play=True,
-                can_expand=False,
-                children=None
+                can_play=False,
+                can_expand=True,
+                children=None,
+                **media
             )
-            for root_path, name in LIBRARY_MAP.items()
+            for root_path, media in LIBRARY_MAP.items()
         ]
 
         return BrowseMedia(**library_info)
-        response.children_media_class = MEDIA_CLASS_DIRECTORY
+
+    async def async_browse_media_podcasts(self):
+        children = [
+            BrowseMedia(
+                title=playlist.get("name"),
+                media_class=MEDIA_CLASS_PODCAST,
+                media_content_id=playlist['uri'],
+                media_content_type=MEDIA_TYPE_PODCAST,
+                can_play=True,
+                can_expand=False,
+            )
+            for playlist in await self._api.get_albums(media_kind='podcast')
+        ]
+
+        return BrowseMedia(
+            title="Podcasts",
+            media_class=MEDIA_CLASS_DIRECTORY,
+            media_content_id="podcasts",
+            media_content_type=MEDIA_TYPE_PODCAST,
+            children_media_class=MEDIA_CLASS_PODCAST,
+            can_play=False,
+            can_expand=True,
+            children=children,
+        )
 
     def _use_pipe_control(self):
         """Return which pipe control from KNOWN_PIPES to use."""
@@ -916,38 +937,3 @@ class OwntoneUpdater:
                 self._api,
                 outputs_to_add,
             )
-
-
-def build_item_response(api, payload):  # noqa: C901
-    """Create response payload for the provided media query."""
-    media_content_type = payload["media_content_type"]
-    media_content_id = payload["media_content_id"]
-    title = None
-    image = None
-
-
-def library_payload():
-    """
-    Create response payload to describe contents of a specific library.
-
-    Used by async_browse_media.
-    """
-    library_info = {
-        "title": "Media Library",
-        "media_class": MEDIA_CLASS_DIRECTORY,
-        "media_content_id": "library",
-        "media_content_type": "library",
-        "can_play": False,
-        "can_expand": True,
-        "children": [],
-    }
-
-    for item in [{"name": n, "type": t} for t, n in LIBRARY_MAP.items()]:
-        library_info["children"].append(
-            item_payload(
-                {"name": item["name"], "type": item["type"], "uri": item["type"]}
-            )
-        )
-    response = BrowseMedia(**library_info)
-    response.children_media_class = MEDIA_CLASS_DIRECTORY
-    return response

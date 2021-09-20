@@ -14,7 +14,9 @@ from homeassistant.components.media_player.const import (
     SUPPORT_TURN_OFF,
     SUPPORT_TURN_ON,
     SUPPORT_VOLUME_MUTE,
-    SUPPORT_VOLUME_SET,
+    SUPPORT_VOLUME_SET, MEDIA_CLASS_DIRECTORY, MEDIA_CLASS_PLAYLIST, MEDIA_TYPE_PLAYLIST, MEDIA_CLASS_ARTIST,
+    MEDIA_TYPE_ARTIST, MEDIA_CLASS_ALBUM, MEDIA_TYPE_ALBUM, MEDIA_TYPE_GENRE, MEDIA_CLASS_GENRE, MEDIA_CLASS_PODCAST,
+    MEDIA_TYPE_PODCAST, MEDIA_CLASS_CHANNEL, MEDIA_TYPE_CHANNELS,
 )
 
 CALLBACK_TIMEOUT = 8  # max time between command and callback from owntone server
@@ -33,13 +35,12 @@ HASS_DATA_REMOVE_LISTENERS_KEY = "REMOVE_LISTENERS"
 HASS_DATA_UPDATER_KEY = "UPDATER"
 KNOWN_PIPES = {"librespot-java"}
 LIBRARY_MAP = {
-    "playlists": "Playlists",
-    "artists": "Artists",
-    "albums": "Albums",
-    "tracks": "Tracks",
-    "genres": "Genres",
-    "podcasts": "Podcasts",
-    "radio": "Radio",
+    "playlists": dict(title="Playlists", media_class=MEDIA_CLASS_PLAYLIST, media_content_type=MEDIA_TYPE_PLAYLIST),
+    "artists": dict(title="Artists", media_class=MEDIA_CLASS_ARTIST, media_content_type=MEDIA_TYPE_ARTIST),
+    "albums": dict(title="Albums", media_class=MEDIA_CLASS_ALBUM, media_content_type=MEDIA_TYPE_ALBUM),
+    "genres": dict(title="Genres", media_class=MEDIA_CLASS_GENRE, media_content_type=MEDIA_TYPE_GENRE),
+    "podcasts": dict(title="Podcasts", media_class=MEDIA_CLASS_PODCAST, media_content_type=MEDIA_TYPE_PODCAST),
+    "radio": dict(title="Radio", media_class=MEDIA_CLASS_CHANNEL, media_content_type=MEDIA_TYPE_CHANNELS),
 }
 PIPE_FUNCTION_MAP = {
     "librespot-java": {
